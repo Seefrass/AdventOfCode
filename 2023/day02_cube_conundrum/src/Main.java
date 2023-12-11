@@ -53,9 +53,11 @@ public class Main {
 
     public static void main(String[] args) {
         Path path = Path.of("input.txt");
-        try (Stream<String> input = Files.lines(path)) {
-            var result = input.map(Main::parseLine).filter(Game::isValid).mapToInt(g -> g.id).sum();
-            System.out.println(result);
+        try (Stream<String> input1 = Files.lines(path); Stream<String> input2 = Files.lines(path)) {
+            int result1 = input1.map(Main::parseLine).filter(Game::isValid).mapToInt(g -> g.id).sum();
+            int result2 = input2.map(Main::parseLine).mapToInt(g -> g.red * g.green * g.blue).sum();
+            System.out.println("The sum of all possible game ids is: " + result1);
+            System.out.println("The sum of powers of all lines is: " + result2);
         } catch (IOException e) {
             e.printStackTrace();
         }
