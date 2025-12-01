@@ -2,6 +2,6 @@
 out
 *.iml
 *.txt
-.lock
-.toml
+*.lock
+*.toml
 target
