@@ -68,6 +68,11 @@ fn is_invalid_id(id: u64) -> bool {
 
 fn is_invalid_id_part_two(id: u64) -> bool {
     let id_str = id.to_string();
+
+    if !is_feasibly_invalid(&id_str) {
+        return false;
+    }
+
     let divisors = get_unique_divisors(id_str.len());
     for d in divisors {
         let chunks = id_str
@@ -94,4 +99,13 @@ fn get_unique_divisors(n: usize) -> Vec<usize> {
     }
 
     result
+}
+
+fn is_feasibly_invalid(id_str: &String) -> bool {
+    let mut buckets = vec![0; 10];
+    id_str.chars().for_each(|c| {
+        let idx = c.to_digit(10).unwrap();
+        buckets[idx as usize] += 1;
+    });
+    !buckets.iter().any(|&d| d == 1)
 }
