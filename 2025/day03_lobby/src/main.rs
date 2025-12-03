@@ -18,13 +18,19 @@ fn main() {
 
     //--- Actual Task starts here ---//
 
-    let result: u32 = input
-        .split("\n")
-        .map(parse_banks)
-        .map(find_max_joltage)
-        .sum();
+    let result = input.split("\n").map(parse_banks);
 
-    println!("Sum of max joltages: {}", result);
+    let result1: u64 = result.clone().map(|b| find_max_joltage(b, 2)).sum();
+    let result2: u64 = result.map(|b| find_max_joltage(b, 12)).sum();
+
+    println!(
+        "Sum of max joltages when turning on exactly two batteries: {}",
+        result1
+    );
+    println!(
+        "Sum of max joltages when turning on exactly twelve batteries: {}",
+        result2
+    );
 }
 
 fn parse_banks(bank_str: &str) -> Vec<u8> {
@@ -34,10 +40,18 @@ fn parse_banks(bank_str: &str) -> Vec<u8> {
         .collect::<Vec<u8>>()
 }
 
-fn find_max_joltage(bank: Vec<u8>) -> u32 {
-    let (first_digit, idx) = highest_digit(&bank[0..bank.len() - 1]);
-    let (second_digit, _) = highest_digit(&bank[idx + 1..bank.len()]);
-    first_digit as u32 * 10 + second_digit as u32
+fn find_max_joltage(bank: Vec<u8>, battery_count: u32) -> u64 {
+    let mut result = 0;
+
+    let mut idx = 0;
+    for i in (1..=battery_count).rev() {
+        let (digit, new_idx) = highest_digit(&bank[idx..bank.len() - (i - 1) as usize]);
+        idx += new_idx + 1; // note: new_idx is only the local index from within the slice thus "+="
+
+        result = result * 10 + digit as u64
+    }
+
+    result
 }
 
 fn highest_digit(digits: &[u8]) -> (u8, usize) {
