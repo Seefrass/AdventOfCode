@@ -63,8 +63,8 @@ fn is_accessible(x: usize, y: usize, grid: &Vec<Vec<char>>) -> bool {
     let size_y = grid.len();
 
     let mut num_neighbors = 0;
-    for i in [-1i32, 0i32, 1i32] {
-        for j in [-1i32, 0i32, 1i32] {
+    for i in [-1, 0, 1] {
+        for j in [-1, 0, 1] {
             let idx_y = y as i32 + i;
             if idx_y < 0 || idx_y >= size_y as i32 {
                 continue;
