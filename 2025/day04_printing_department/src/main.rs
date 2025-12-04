@@ -28,15 +28,12 @@ fn main() {
 }
 
 fn process_rolls(grid: &mut Vec<Vec<char>>, remove: bool) -> u32 {
-    let size_x = grid[0].len();
-    let size_y = grid.len();
-
     let mut result = 0;
 
     loop {
         let mut roll_count = 0;
-        for x in 0..size_x {
-            for y in 0..size_y {
+        for y in 0..grid.len() {
+            for x in 0..grid[0].len() {
                 if is_accessible(x, y, &grid) {
                     if remove {
                         grid[y][x] = '.';
@@ -47,11 +44,9 @@ fn process_rolls(grid: &mut Vec<Vec<char>>, remove: bool) -> u32 {
         }
         result += roll_count;
         if roll_count == 0 || !remove {
-            break;
+            break result;
         }
     }
-
-    result
 }
 
 fn is_accessible(x: usize, y: usize, grid: &Vec<Vec<char>>) -> bool {
@@ -59,19 +54,20 @@ fn is_accessible(x: usize, y: usize, grid: &Vec<Vec<char>>) -> bool {
         return false;
     }
 
-    let size_x = grid[0].len();
-    let size_y = grid.len();
-
     let mut num_neighbors = 0;
     for i in [-1, 0, 1] {
+        let idx_y = y as i32 + i;
+        if idx_y < 0 || idx_y >= grid.len() as i32 {
+            continue;
+        }
+
         for j in [-1, 0, 1] {
-            let idx_y = y as i32 + i;
-            if idx_y < 0 || idx_y >= size_y as i32 {
+            if i == 0 && j == 0 {
                 continue;
             }
 
             let idx_x = x as i32 + j;
-            if idx_x < 0 || idx_x >= size_x as i32 {
+            if idx_x < 0 || idx_x >= grid[0].len() as i32 {
                 continue;
             }
 
@@ -81,7 +77,6 @@ fn is_accessible(x: usize, y: usize, grid: &Vec<Vec<char>>) -> bool {
             }
         }
     }
-    num_neighbors -= 1;
 
     num_neighbors < 4
 }
