@@ -20,31 +20,14 @@ fn main() {
 
     let mut grid: Vec<Vec<char>> = input.split("\n").map(|s| s.chars().collect()).collect();
 
-    let result1 = count_accessible_rolls(&grid);
-    let result2 = remove_accessible_rolls(&mut grid);
+    let result1 = process_rolls(&mut grid, false);
+    let result2 = process_rolls(&mut grid, true);
 
-    println!("A total of {} rolls are accesible", result1);
+    println!("A total of {} rolls can be accessed", result1);
     println!("A total of {} rolls can be removed", result2);
 }
 
-fn count_accessible_rolls(grid: &Vec<Vec<char>>) -> u32 {
-    let size_x = grid[0].len();
-    let size_y = grid.len();
-
-    let mut result = 0;
-
-    for x in 0..size_x {
-        for y in 0..size_y {
-            if is_accessible(x, y, &grid) {
-                result += 1;
-            }
-        }
-    }
-
-    result
-}
-
-fn remove_accessible_rolls(grid: &mut Vec<Vec<char>>) -> u32 {
+fn process_rolls(grid: &mut Vec<Vec<char>>, remove: bool) -> u32 {
     let size_x = grid[0].len();
     let size_y = grid.len();
 
@@ -55,13 +38,15 @@ fn remove_accessible_rolls(grid: &mut Vec<Vec<char>>) -> u32 {
         for x in 0..size_x {
             for y in 0..size_y {
                 if is_accessible(x, y, &grid) {
-                    grid[y][x] = '.';
+                    if remove {
+                        grid[y][x] = '.';
+                    }
                     roll_count += 1
                 }
             }
         }
         result += roll_count;
-        if roll_count == 0 {
+        if roll_count == 0 || !remove {
             break;
         }
     }
@@ -78,8 +63,8 @@ fn is_accessible(x: usize, y: usize, grid: &Vec<Vec<char>>) -> bool {
     let size_y = grid.len();
 
     let mut num_neighbors = 0;
-    for i in vec![-1i32, 0i32, 1i32] {
-        for j in vec![-1i32, 0i32, 1i32] {
+    for i in [-1i32, 0i32, 1i32] {
+        for j in [-1i32, 0i32, 1i32] {
             let idx_y = y as i32 + i;
             if idx_y < 0 || idx_y >= size_y as i32 {
                 continue;
