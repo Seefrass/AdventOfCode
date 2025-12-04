@@ -18,7 +18,16 @@ fn main() {
 
     //--- Actual Task starts here ---//
 
-    let grid: Vec<Vec<char>> = input.split("\n").map(|s| s.chars().collect()).collect();
+    let mut grid: Vec<Vec<char>> = input.split("\n").map(|s| s.chars().collect()).collect();
+
+    let result1 = count_accessible_rolls(&grid);
+    let result2 = remove_accessible_rolls(&mut grid);
+
+    println!("A total of {} rolls are accesible", result1);
+    println!("A total of {} rolls can be removed", result2);
+}
+
+fn count_accessible_rolls(grid: &Vec<Vec<char>>) -> u32 {
     let size_x = grid[0].len();
     let size_y = grid.len();
 
@@ -32,7 +41,32 @@ fn main() {
         }
     }
 
-    println!("There are a total of {} rolls accesible", result);
+    result
+}
+
+fn remove_accessible_rolls(grid: &mut Vec<Vec<char>>) -> u32 {
+    let size_x = grid[0].len();
+    let size_y = grid.len();
+
+    let mut result = 0;
+
+    loop {
+        let mut roll_count = 0;
+        for x in 0..size_x {
+            for y in 0..size_y {
+                if is_accessible(x, y, &grid) {
+                    grid[y][x] = '.';
+                    roll_count += 1
+                }
+            }
+        }
+        result += roll_count;
+        if roll_count == 0 {
+            break;
+        }
+    }
+
+    result
 }
 
 fn is_accessible(x: usize, y: usize, grid: &Vec<Vec<char>>) -> bool {
