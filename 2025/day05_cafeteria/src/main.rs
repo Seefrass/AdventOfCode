@@ -49,10 +49,10 @@ fn is_fresh(id: &u64, id_ranges: &Vec<RangeInclusive<u64>>) -> bool {
 }
 
 // Note:
-// The idea of this solution is not my own! It actually comes from a friend of mine, so all credit
-// goes to him: https://github.com/xA1ph/AdventOfCode2025/blob/main/src/day05/Aufgabe_5.java
-// I chose to implement this idea as an excercise, because 1) it is more intuitive and 2) is is
-// also much faster than my original solution.
+// The idea for this approach is not my own! It comes from a friend of mine, so all credit goes to
+// them: https://github.com/xA1ph/AdventOfCode2025/blob/main/src/day05/Aufgabe_5.java
+// I chose to implement this idea as an excercise, because it is more intuitive and also much
+// faster than my original solution.
 
 fn remove_overlaps(ranges: Vec<RangeInclusive<u64>>) -> Vec<RangeInclusive<u64>> {
     let mut ranges = ranges.clone();
