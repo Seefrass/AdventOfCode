@@ -1,4 +1,5 @@
 use std::{
+    cmp,
     fs::File,
     io::{BufReader, Read},
     ops::RangeInclusive,
@@ -22,7 +23,7 @@ fn main() {
     let (id_ranges, ids) = input.split_once("\n\n").unwrap();
 
     let id_ranges: Vec<RangeInclusive<u64>> = id_ranges.split("\n").map(to_range).collect();
-    let id_ranges = optimize_ranges(id_ranges);
+    let id_ranges = remove_overlaps(id_ranges);
 
     let ids = ids.split("\n").map(|s| s.parse::<u64>().unwrap());
 
@@ -47,50 +48,29 @@ fn is_fresh(id: &u64, id_ranges: &Vec<RangeInclusive<u64>>) -> bool {
     false
 }
 
-fn optimize_ranges(ranges: Vec<RangeInclusive<u64>>) -> Vec<RangeInclusive<u64>> {
+// Note:
+// The idea of this solution is not my own! It actually comes from a friend of mine, so all credit
+// goes to him: https://github.com/xA1ph/AdventOfCode2025/blob/main/src/day05/Aufgabe_5.java
+// I chose to implement this idea as an excercise, because 1) it is more intuitive and 2) is is
+// also much faster than my original solution.
+
+fn remove_overlaps(ranges: Vec<RangeInclusive<u64>>) -> Vec<RangeInclusive<u64>> {
     let mut ranges = ranges.clone();
-    let mut result = Vec::new();
+    let mut result: Vec<RangeInclusive<u64>> = Vec::new();
 
-    while !ranges.is_empty() {
-        let mut current = ranges.remove(0);
-
-        loop {
-            let (mut overlaps, remainder) = remove_overlapping_with(&current, ranges);
-            ranges = remainder;
-
-            if overlaps.len() > 0 {
-                overlaps.push(current);
-                current = merge_ranges(overlaps);
+    ranges.sort_by(|r1, r2| r1.start().cmp(r2.start()));
+    let tmp = ranges
+        .into_iter()
+        .reduce(|r1: RangeInclusive<u64>, r2: RangeInclusive<u64>| {
+            if r1.end() >= r2.start() {
+                RangeInclusive::new(*r1.start(), cmp::max(*r1.end(), *r2.end()))
             } else {
-                break;
+                result.push(r1);
+                r2
             }
-        }
-
-        result.push(current);
-    }
+        })
+        .unwrap();
+    result.push(tmp); // don't forget the remaining range
 
     result
-}
-
-fn remove_overlapping_with(
-    range: &RangeInclusive<u64>,
-    others: Vec<RangeInclusive<u64>>,
-) -> (Vec<RangeInclusive<u64>>, Vec<RangeInclusive<u64>>) {
-    let mut remove = Vec::new();
-    let mut keep = Vec::new();
-
-    for r in others {
-        if range.start() <= r.end() && r.start() <= range.end() {
-            remove.push(r);
-        } else {
-            keep.push(r);
-        }
-    }
-
-    (remove, keep)
-}
-
-fn merge_ranges(ranges: Vec<RangeInclusive<u64>>) -> RangeInclusive<u64> {
-    let bounds = ranges.iter().map(|r| [*r.start(), *r.end()]).flatten();
-    bounds.clone().min().unwrap()..=bounds.max().unwrap()
 }
