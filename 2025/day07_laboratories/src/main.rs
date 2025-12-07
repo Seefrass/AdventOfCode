@@ -1,6 +1,7 @@
 use std::{
     fs::File,
     io::{BufReader, Read},
+    time::Instant,
 };
 
 const FILE_NAME: &str = "input.txt";
@@ -18,7 +19,11 @@ fn main() {
 
     //--- Actual Task starts here ---//
 
-    let mut grid: Vec<Vec<char>> = input.split("\n").map(|s| s.chars().collect()).collect();
+    let mut grid: Vec<Vec<char>> = input
+        .split("\n")
+        .step_by(2) // every second line can be omitted, as they do not contain any splitters
+        .map(|s| s.chars().collect())
+        .collect();
 
     let start_idx = grid.remove(0).iter().position(|&c| c == 'S').unwrap();
     let mut split_cnt = 0;
@@ -27,12 +32,17 @@ fn main() {
         tachion_step(acc, line, &mut split_cnt)
     });
 
+    let start = Instant::now();
+
     let timeline_cnt: u64 = grid
         .iter()
         .fold(vec![(start_idx, 1)], |acc, line| tachion_step2(acc, line))
         .iter()
         .map(|(_, t)| t)
         .sum();
+
+    let dur = start.elapsed();
+    println!("Task2 total: {:?}", dur);
 
     println!("Total number of splits: {}", split_cnt);
     println!("Total number of timelines {}", timeline_cnt);
