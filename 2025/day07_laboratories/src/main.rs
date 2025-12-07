@@ -70,19 +70,18 @@ fn tachion_step2(t_idx: Vec<(usize, u64)>, line: &Vec<char>) -> Vec<(usize, u64)
 
     let mut result = Vec::new();
 
-    let mut current_idx = 0;
-    let mut idx_timelines = 0;
-
-    for (idx, timeline_num) in tmp {
-        if current_idx == idx {
-            idx_timelines += timeline_num;
-        } else {
-            result.push((current_idx, idx_timelines));
-            current_idx = idx;
-            idx_timelines = timeline_num;
-        }
-    }
-    result.push((current_idx, idx_timelines));
+    let res = tmp
+        .into_iter()
+        .reduce(|(i1, t_num1), (i2, t_num2)| {
+            if i1 == i2 {
+                (i1, t_num1 + t_num2)
+            } else {
+                result.push((i1, t_num1));
+                (i2, t_num2)
+            }
+        })
+        .unwrap();
+    result.push(res);
 
     result
 }
