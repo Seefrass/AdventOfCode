@@ -1,7 +1,6 @@
 use std::{
     fs::File,
     io::{BufReader, Read},
-    time::Instant,
 };
 
 const FILE_NAME: &str = "input.txt";
@@ -32,17 +31,12 @@ fn main() {
         tachion_step(acc, line, &mut split_cnt)
     });
 
-    let start = Instant::now();
-
     let timeline_cnt: u64 = grid
         .iter()
         .fold(vec![(start_idx, 1)], |acc, line| tachion_step2(acc, line))
         .iter()
         .map(|(_, t)| t)
         .sum();
-
-    let dur = start.elapsed();
-    println!("Task2 total: {:?}", dur);
 
     println!("Total number of splits: {}", split_cnt);
     println!("Total number of timelines {}", timeline_cnt);
