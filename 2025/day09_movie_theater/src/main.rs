@@ -65,29 +65,34 @@ fn is_in_green(idx_pair: (usize, usize), corners: Vec<(u64, u64)>) -> bool {
     let min_corner = (x1.min(x2), y1.min(y2));
     let max_corner = (x1.max(x2), y1.max(y2));
 
+    // if there is a corner inside the middle of our rectangle we cannot be completely in the green area
     for c in corners.clone() {
         if c.0 > min_corner.0 && c.1 > min_corner.1 && c.0 < max_corner.0 && c.1 < max_corner.1 {
             return false;
         }
     }
 
-    // corner1 is the corner with the lower y value!
+    // let corner1 be the corner with the lower y value!
     let corner1_idx = if y1 < y2 { idx_pair.0 } else { idx_pair.1 };
     let corner1 = corners[corner1_idx];
 
     let corner2_idx = if y1 < y2 { idx_pair.1 } else { idx_pair.0 };
     let corner2 = corners[corner2_idx];
 
+    // there are only 3 cases that can occurr now
     if corner1.0 < corner2.0 {
-        /*
-         * we have the following situation:
+        /* CASE (1): c2 is to the right of c1
+         *
+         * first we travel along the outline of the green field starting at c1 until c2
          *
          *      c1--------->x
          *      .           |
          *      .           v
          *      . . . . . . c2
          *
-         * on the path from c1->...->c2 no corners are allowed on the dotted line!
+         * on the path from c1->...->c2 no corners/edges are allowed to hit the dotted line!
+         * (note that we already know that the paths wont be in the middle of the rectangle
+         * thus the arrow shows the shortes path to c2, though it could of course be longer)
          */
         let mut corners_tmp = corners
             .clone()
@@ -121,14 +126,14 @@ fn is_in_green(idx_pair: (usize, usize), corners: Vec<(u64, u64)>) -> bool {
         }
 
         /*
-         * complete the cycle
+         * now we travel back form c2 to c1, continuing the cycle
          *
          *      c1 . . . . . .
          *      ^            .
          *      |            .
          *      x <---------c2
          *
-         * on the path from c2->...->c1 no corners are allowed on the dotted line!
+         * on the path from c2->...->c1 no corners/edges are allowed to hit the dotted line again!
          */
 
         let mut corners_tmp = corners
@@ -162,7 +167,8 @@ fn is_in_green(idx_pair: (usize, usize), corners: Vec<(u64, u64)>) -> bool {
             }
         }
     } else {
-        /*
+        /* CASE (1): c2 is to the left of c1
+         *
          * we have the following situation:
          *
          *      . . . . . . c1
@@ -242,9 +248,31 @@ fn is_in_green(idx_pair: (usize, usize), corners: Vec<(u64, u64)>) -> bool {
         }
     }
 
+    /* CASE (3): c2 and c1 are in a line
+     * in any case they are in the green
+     */
     true
 }
 
+/// Convert a path of only corners to a completed path, filling all the spaces in between the
+/// corners with edges. This costs a lot of time, since we call this method a lot, but it is
+/// the only way I found to solve the following edge case
+///
+///     .....................
+///     .#XXXX#....#XX#......
+///     .X....X....X..X......
+///     .X----X----X--#XC....
+///     .X....X....X....X....
+///     .CX#--X----X----X....
+///     ...X..X....X....X....
+///     ...X..#XXXX#....X....
+///     ...X............X....
+///     ...#XXXXXXXXXXXX#....
+///     .....................
+///
+/// Look at the corners marked with 'C' they do not have any corners in inside their rectangle,
+/// nor on the edges of their rectangle, however it is still not completely in the green tiles.
+///
 fn to_full_path(path: &Vec<(u64, u64)>) -> Vec<(u64, u64)> {
     let mut result = Vec::new();
 
