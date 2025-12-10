@@ -3,12 +3,14 @@ use std::{
     io::{BufReader, Read},
 };
 
+use microlp::{ComparisonOp, LinearExpr, OptimizationDirection, Problem};
+
 const FILE_NAME: &str = "input.txt";
 
 struct Machine {
     lights: Vec<bool>,
     buttons: Vec<Vec<usize>>,
-    joltages: Vec<u32>,
+    joltages: Vec<i32>,
 }
 
 impl From<&str> for Machine {
@@ -24,13 +26,13 @@ impl From<&str> for Machine {
             _ => (),
         });
 
-        let joltages: Vec<u32> = joltage_str
+        let joltages: Vec<i32> = joltage_str
             .strip_prefix("{")
             .unwrap()
             .strip_suffix("}")
             .unwrap()
             .split(',')
-            .map(|j| j.parse::<u32>().unwrap())
+            .map(|j| j.parse::<i32>().unwrap())
             .collect();
 
         let buttons = line
@@ -55,7 +57,7 @@ impl From<&str> for Machine {
 }
 
 impl Machine {
-    fn min_button_presses(&self) -> u32 {
+    fn min_button_presses_lights(&self) -> u32 {
         for n in 1..self.buttons.len() {
             let combinations = permutations_of_len(&self.buttons, n);
             let fulfills_combination = combinations
@@ -75,6 +77,36 @@ impl Machine {
         }
         panic!("no combination of buttons available!")
     }
+
+    fn min_button_presses_joltages(&self) -> u32 {
+        let mut problem = Problem::new(OptimizationDirection::Minimize);
+
+        let max_joltage = self.joltages.iter().max().unwrap();
+        let variables = (&self.buttons)
+            .into_iter()
+            .map(|_| problem.add_integer_var(1.0, (0, *max_joltage)))
+            .collect::<Vec<_>>();
+
+        for j_idx in 0..self.joltages.len() {
+            let mut expr = LinearExpr::empty();
+
+            (&self.buttons)
+                .into_iter()
+                .enumerate()
+                .for_each(|(i, nums)| {
+                    nums.into_iter().for_each(|&idx| {
+                        if idx == j_idx {
+                            expr.add(variables[i], 1.0);
+                        }
+                    })
+                });
+
+            problem.add_constraint(expr, ComparisonOp::Eq, self.joltages[j_idx] as f64);
+        }
+
+        let solution = problem.solve().expect("no solution to this problem");
+        solution.objective().round() as u32 //this round is important!
+    }
 }
 
 fn main() {
@@ -91,9 +123,18 @@ fn main() {
     //--- Actual Task starts here ---//
 
     let machines: Vec<Machine> = input.split("\n").map(Machine::from).collect();
-    let result: u32 = machines.iter().map(Machine::min_button_presses).sum();
 
-    println!("Fewest total button presses required: {}", result)
+    let result1: u32 = machines
+        .iter()
+        .map(Machine::min_button_presses_lights)
+        .sum();
+    println!("Fewest total button presses required: {}", result1);
+
+    let result2: u32 = machines
+        .iter()
+        .map(Machine::min_button_presses_joltages)
+        .sum();
+    println!("Fewest total button presses required: {}", result2)
 }
 
 fn permutations_of_len<T: Clone>(v: &Vec<T>, n: usize) -> Vec<Vec<T>> {
