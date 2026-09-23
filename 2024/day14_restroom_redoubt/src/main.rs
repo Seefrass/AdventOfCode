@@ -3,6 +3,8 @@ use std::{
     io::{BufReader, Read},
 };
 
+use colored::Colorize;
+
 use regex::Regex;
 
 const FILE_NAME: &str = "input.txt";
@@ -23,14 +25,17 @@ fn main() {
     let input = input.trim();
 
     //--- Actual Task starts here ---//
-    let robots = input.split("\n").map(|s| {
-        let mut r = Robot::try_from(s).unwrap();
-        r.step(100);
-        r.position
-    });
-    // .for_each(|r| println!("{:?}", r));
+    let mut robots: Vec<_> = input
+        .split("\n")
+        .map(|s| Robot::try_from(s).unwrap())
+        .collect();
     let (w, e): (Vec<_>, Vec<_>) = robots
         .clone()
+        .into_iter()
+        .map(|mut r| {
+            r.step(100);
+            r.position
+        })
         .filter(|p| p.0 != SPACE_WIDTH / 2 && p.1 != SPACE_HEIGHT / 2)
         .partition(|p| p.0 < SPACE_WIDTH / 2);
 
@@ -41,9 +46,52 @@ fn main() {
         "total safety factor is: {}",
         nw.len() * sw.len() * ne.len() * se.len()
     );
+
+    // part 2: this problem is kind of frustrating, because the term "christmas
+    // tree" is rather ambiguous.
+    // first attempt: a christmas tree must have a trunk so we assum that there
+    // is a vertical line perfectly in the middle of the board.
+    // -> doesn't seem to work, there are not enough 1 spaces to for such a tree
+    // second attempt: a christmas tree has no square with >= 1 robot
+    // -> this seems to work consistently at least, if I find more motivation maybe
+    // solve this in a nicer way (for example find some metric that shows how clustered
+    // the robots are etc.)
+
+    let mut steps = 1; //apparently we start at second 1?!?!?
+    loop {
+        for i in 0..robots.len() {
+            robots[i].step(1);
+        }
+        let mut space = vec![vec![0; SPACE_WIDTH as usize]; SPACE_HEIGHT as usize];
+        robots.iter().for_each(|r| {
+            space[r.position.1 as usize][r.position.0 as usize] += 1;
+            // print_space(&space);
+            // println!();
+        });
+        if !space.iter().flatten().fold(false, |acc, n| acc || *n > 1) {
+            print_space(&space);
+            println!("this took {} seconds", steps);
+            break;
+        }
+        steps += 1;
+    }
 }
 
-#[derive(Debug)]
+fn print_space(space: &Vec<Vec<usize>>) {
+    space.iter().for_each(|row| {
+        row.iter().for_each(|n| {
+            if *n > 0 {
+                print!("{}", n.to_string().green().bold());
+            } else {
+                print!("{}", n);
+            }
+        });
+
+        println!()
+    });
+}
+
+#[derive(Debug, Clone)]
 struct Robot {
     position: (i32, i32),
     velocity: (i32, i32),
