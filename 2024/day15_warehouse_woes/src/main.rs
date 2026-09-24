@@ -67,7 +67,7 @@ fn move_object(
             None => {
                 return None;
             }
-            Some((x, y)) => {
+            Some(_) => {
                 map[goal.1 as usize][goal.0 as usize] = map[origin.1 as usize][origin.0 as usize];
                 map[origin.1 as usize][origin.0 as usize] = '.';
                 return Some(goal);
