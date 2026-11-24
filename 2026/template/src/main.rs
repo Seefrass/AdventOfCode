@@ -1,60 +1,60 @@
-use std::{fs::File, io::{BufReader, Read}};
-
-fn main() {
-}
+use std::{error::Error, fs::File, io::Read};
 
 fn part_one() -> u64 {
-    0
+    1
 }
 
 fn part_two() -> u64 {
     0
 }
 
-fn read_file() -> String {
-    return "".to_string();
+fn parse_file(filename: &str) -> Result<(), Box<dyn Error>> {
+    // TODO:
+    // - is returning Result<T,E> a good idea here? why not just panic?
+    // - how to make user define Ok(T) type T? problem dependent.
+    let mut file = File::open(filename)?;
+    let mut data = String::new();
+
+    file.read_to_string(&mut data)?;
+
+    let data = data.trim(); // remove trailing newline. Is this the best way to do this?
+    Ok(())
 }
 
-fn parse_file() {}
+/* -------------------------------------------------------------------------- */
+
+fn main() {
+    const FILENAME: &str = "input.txt";
+    let _ = parse_file(FILENAME);
+    let result_one = part_one();
+    println!("result one: {}", result_one);
+    let result_two = part_two();
+    println!("result two: {}", result_two);
+}
+
+/* -------------------------------------------------------------------------- */
 
 #[cfg(test)]
 mod tests {
 
-use super::*;
+    use super::*;
 
     #[test]
     fn test_example_part_one() {
-        // todo: name this lhs/rhs?
-        const EXPECTED : u64 = 0; // cannot be const due to todo macro! const or todo()?
-        println!("expecting result: {}", EXPECTED); // 
+        const FILENAME: &str = "example.txt";
+        const EXPECTED: u64 = 0; // cannot be const due to todo macro! const or todo()?
 
-        const FILE_NAME : &str = "example.txt";
+        // let data = parse_file(FILENAME).unwrap();
 
-        // TODO:
-        // 1) open example file
-        // 2) read contents
-        // 3) pass to part one
-        // 4) return results / assert
-        
-        let file = File::open(FILE_NAME).unwrap();
-        let mut reader = BufReader::new(file);
-        let mut data = String::new();
-
-        reader.read_to_string(&mut data).unwrap();
-
-        let data = data.trim(); // remove trailing newline. Is this the best way to do this?
-
-        let result = part_one();
-        
-        //how do I print the wrong result in case it is wrong?
-        assert_eq!(result, EXPECTED);
+        // TODO: rephrase this! maybe replace with default assert!()
+        assert_eq!(EXPECTED, part_one(), "correct answer is {}", EXPECTED);
     }
 
     #[test]
     fn test_example_part_two() {
         // this is kind of annoying because i don't want to test part two while doing part one...
         println!("test");
-        const EXPECTED : u64 = 0;
+        const EXPECTED: u64 = 0;
         assert!(part_two() == 0);
     }
 }
