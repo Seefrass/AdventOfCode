@@ -1,60 +1,73 @@
-use std::{error::Error, fs::File, io::Read};
+use std::{fs::File, io::Read};
 
-fn part_one() -> u64 {
-    1
-}
+/// TODO:
+/// - documentation for type T alias
+/// - find a suitable name
+type T = (); // TODO: set correct type
 
-fn part_two() -> u64 {
-    0
-}
-
-fn parse_file(filename: &str) -> Result<(), Box<dyn Error>> {
-    // TODO:
-    // - is returning Result<T,E> a good idea here? why not just panic?
-    // - how to make user define Ok(T) type T? problem dependent.
-    let mut file = File::open(filename)?;
+/// TODO: documentation...
+fn parse_file(filename: &str) -> T {
+    let mut file = File::open(filename).unwrap();
     let mut data = String::new();
 
-    file.read_to_string(&mut data)?;
+    file.read_to_string(&mut data).unwrap();
 
     let data = data.trim(); // remove trailing newline. Is this the best way to do this?
-    Ok(())
+
+    todo!()
+}
+
+fn part_one(data : &mut T) -> u64 {
+    let _ = data;
+    todo!() //TODO: message?
+}
+
+fn part_two(data : &mut T) -> u64 {
+    let _ = data;
+    todo!()
 }
 
 /* -------------------------------------------------------------------------- */
 
 fn main() {
     const FILENAME: &str = "input.txt";
-    let _ = parse_file(FILENAME);
-    let result_one = part_one();
-    println!("result one: {}", result_one);
-    let result_two = part_two();
-    println!("result two: {}", result_two);
+    let mut data = parse_file(FILENAME);
+
+    // shared data for both parts goes here!
+
+    let result = part_one(&mut data.clone());
+    println!("result one: {}", result);
+
+    let result = part_two(&mut data);
+    println!("result two: {}", result);
 }
 
 /* -------------------------------------------------------------------------- */
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
     #[test]
     fn test_example_part_one() {
         const FILENAME: &str = "example.txt";
-        const EXPECTED: u64 = 0; // cannot be const due to todo macro! const or todo()?
+        const EXPECTED: u64 = 0; // TODO: transfer solution from problem stmt
 
-        // let data = parse_file(FILENAME).unwrap();
+        let mut data = parse_file(FILENAME);
+        let result = part_one(&mut data);
 
-        // TODO: rephrase this! maybe replace with default assert!()
-        assert_eq!(EXPECTED, part_one(), "correct answer is {}", EXPECTED);
+        assert!(EXPECTED == result, "expected {} but got {}", EXPECTED, result);
     }
 
     #[test]
+    #[ignore = "part_two() not yet implemented."]
     fn test_example_part_two() {
-        // this is kind of annoying because i don't want to test part two while doing part one...
-        println!("test");
-        const EXPECTED: u64 = 0;
-        assert!(part_two() == 0);
+        const FILENAME: &str = "example.txt";
+        const EXPECTED: u64 = 0; // TODO: transfer solution from problem stmt
+
+        let mut data = parse_file(FILENAME);
+        let result = part_one(&mut data);
+
+        assert!(EXPECTED == result, "expected {} but got {}", EXPECTED, result);
     }
 }
